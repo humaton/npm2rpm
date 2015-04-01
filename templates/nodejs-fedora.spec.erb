@@ -1,40 +1,31 @@
-# spec file for package <%="nodejs-" + spec.name %>
-
-%global npmname <%= spec.npmname %>
 %{?nodejs_find_provides_and_requires}
 
-Name:           <%= "nodejs-" + spec.npmname %>
-Version:        <%= spec.version %>
+Name:           <%= "nodejs-" + npmname %>
+Version:        <%= version %>
 Release:        0%{?dist}
-Summary:        <%= spec.summary %>
-<% unless spec.homepage.nil? || spec.homepage.empty? -%>
-Url:            <%= spec.homepage %>
-<% end -%>
-Source0:        <%= spec.source %>
-<% unless spec.licenses.empty? -%>
-License:        <%= spec.licenses.join(" and ") %>
+Summary:        <%= summary %>
+<% unless licenses.empty? -%>
+License:        <%= licenses.join(" and ") %>
 <% else -%>
 License:        CHECK(Nodejs)
 <% end -%>
-
+<% unless homepage.nil? || homepage.empty? -%>
+Url:            <%= homepage %>
+<% end -%>
+Source0:        <%= source %>
 BuildRoot:      %{_tmppath}/%{pkg_name}-%{version}-%{release}-root-%(%{__id_u} -n)
-
 BuildRequires:  nodejs-devel
 
-<% spec.build_requires.uniq.sort.each do |d| -%>
-# cyclic? BuildRequires: <%= d %>
-<% end -%>
-
-<% spec.requires.uniq.sort.each do |d| -%>
+<% build_requires.uniq.sort.each do |d| -%>
 BuildRequires: <%= d %>
 <% end -%>
 
-<% spec.requires.uniq.sort.each do |d| -%>
+<% requires.uniq.sort.each do |d| -%>
 Requires: <%= d %>
 <% end -%>
 
 %description
-<%= spec.description -%>
+<%= description -%>
 
 %prep
 %setup -q -n package
@@ -45,9 +36,10 @@ Requires: <%= d %>
 %install
 rm -rf %buildroot
 
-mkdir -p %{buildroot}%{nodejs_sitelib}/<%= spec.npmname %>
+mkdir -p %{buildroot}%{nodejs_sitelib}/<%= npmname %>
+cp -pr package.json %{buildroot}%{nodejs_sitelib}/<%= npmname %>
 
-<% (spec.binfiles||{}).each do |name, target| -%>
+<% (binfiles||{}).each do |name, target| -%>
 rm -f %{buildroot}%{_bindir}/<%= name %>
 ln -sf %{_libdir}/node_modules/%{npmname}/<%= target -%> %{buildroot}%{_bindir}/<%= name %>
 <% end -%>
@@ -58,8 +50,8 @@ rm -rf %buildroot
 
 %files
 %defattr(-,root,root,-)
-%{nodejs_sitelib}/<%= spec.npmname %>
-<% if spec.binfiles -%>
+%{nodejs_sitelib}/<%= npmname %>
+<% if binfiles -%>
 %{_bindir}/*
 <% end %>
 %doc LICENSE README.md

@@ -17,10 +17,13 @@ module Npm2Rpm
       result = Array.new
       deps ||= Hash.new
       deps.each do |name, version|
-        case version
+	case version
         # "~1.2.3"
         when /^~?([\d\.]+)(-\d|rc)?$/
           result << "npm(#{name}@#{$1})"
+	# "^1.2.3"
+        when /^\^?([\d\.]+)(-\d|rc)?$/
+          result << "npm(#{name}@#{$1})"  
         # "1.2.0-1.2.3"
         when /^([\d\.]+)-([\d\.]+)$/
           result << "npm(#{name}@#{$2})"
@@ -41,6 +44,7 @@ module Npm2Rpm
       end
       result
     end
+    
     public
     def initialize metadata
       @metadata = metadata
@@ -50,18 +54,23 @@ module Npm2Rpm
     def npmname
       @metadata.name
     end
+    
     def version
       @metadata.version
     end
+    
     def licenses
       [ @metadata.npmdata["license"].nil? ? "Unknown" : @metadata.npmdata["license"] ]
     end
+    
     def summary
       @metadata.npmdata["description"]
     end
+    
     def description
       @metadata.npmdata["description"]
     end
+    
     def homepage
       @metadata.npmdata["homepage"] || @metadata.tarball || abort('FIXME: No homepage found')
     end
@@ -69,15 +78,18 @@ module Npm2Rpm
     def source
       @metadata.tarball
     end
+    
     def dir
       # Find out the top-level directory from tarball
       # The upstreams often use very weird ones
       `tar tzf #{@local_source}` =~ /([^\/]+)/
       $1
     end
+    
     def binfiles
       @metadata.npmdata["bin"]
     end
+    
     def provides
       prv = Array.new
       prv << "npm(#{self.npmname}) = %{version}"
@@ -88,13 +100,19 @@ module Npm2Rpm
       end
       prv
     end
+    
     def requires
       req = dependencies(@metadata.npmdata["dependencies"])
       req += dependencies(@metadata.npmdata["peerDependencies"])
       req.uniq
     end
+    
     def build_requires
       dependencies @metadata.npmdata["devDependencies"]
+    end
+    
+    def get_binding
+      return binding()
     end
 
     def write
@@ -116,11 +134,11 @@ module Npm2Rpm
       template = File.read(template_name)
       # -:  omit blank lines ending in -%>
       erb = ERB.new(template, nil, "-")
+
       File.open("#{@name}.spec", "w+") do |f|
-        spec = self
-        f.puts erb.result
+        #spec = self.get_binding
+        f.puts erb.result self.get_binding
       end
     end
   end
-
 end

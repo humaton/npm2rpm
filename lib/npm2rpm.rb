@@ -6,4 +6,5 @@ module Npm2Rpm
   require 'npm2rpm/rpmlintrc'
   require 'npm2rpm/spec'
   require 'npm2rpm/version'
+  require 'npm2rpm/deps_check'
 end

@@ -126,7 +126,7 @@ module Npm2Rpm
 
   class Metadata
     # npmdata is version-specific information
-    attr_reader :name, :version, :npmdata    
+    attr_reader :name, :version, :npmdata, :metadata
     def initialize name, version = nil
       # Get details from central NPM repository
       # FIXME: Server returns... not quite JSON.
@@ -137,7 +137,7 @@ module Npm2Rpm
       # $metadata_json =~ s/'/"/gm;
       @metadata = JSON.parse json
       @version = version || @metadata["dist-tags"]["latest"] || abort("Can't determine version")
-      puts "#{@version}"
+      
       puts "#{name}-#{@version}"
       @npmdata = @metadata["versions"][@version] || abort("No such version: #{@version.inspect}")
       @name = @metadata["name"]

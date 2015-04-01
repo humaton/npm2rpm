@@ -18,11 +18,15 @@ require 'npm2rpm'
 options = Npm2Rpm::Options.new
 
 metadata = Npm2Rpm::Metadata.new options.package, options.version
-
 spec = Npm2Rpm::Spec.new(metadata)
 spec.write
-Npm2Rpm::Changes.new(spec.name, metadata, options).write
-Npm2Rpm::Rpmlintrc.new(spec.name, metadata, options).write
+ides = Npm2Rpm::DepsCheck.new(metadata)
+ides.new_version_deps
+ides.previous_verion_deps
+#todo builld rpm
+exec "rpmlint #{spec.name}.spec"
+#Npm2Rpm::Changes.new(spec.name, metadata, options).write
+#Npm2Rpm::Rpmlintrc.new(spec.name, metadata, options).write
 
-puts "Done. Now do this:";
-puts "osc add #{spec.name}";
+puts "Done.";
+
